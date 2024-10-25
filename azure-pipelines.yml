@@ -13,20 +13,14 @@ variables:
 steps:
 - checkout: self  # Garante que o código fonte está sendo clonado
 
-- task: CmdLine@2
-  inputs:
-    script: 'npm install'
-    workingDirectory: '$(Build.SourcesDirectory)'  # Configura o diretório de trabalho para o diretório de código fonte
-  displayName: 'NPM'
-
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(Agent.BuildDirectory)'
+    rootFolderOrFile: '$(Build.SourcesDirectory)'  # Mudado para SourcesDirectory para focar nos arquivos de código fonte
     includeRootFolder: true
     archiveType: 'zip'
     archiveFile: '$(caminhoPacote)'
     replaceExistingArchive: true
-  displayName: 'Criando pacote para analise'
+  displayName: 'Criando pacote para análise'
 
 - script: |
     curl -O -L https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
@@ -68,4 +62,3 @@ steps:
     importResults: true
     failBuildOnPolicyFail: false
   displayName: 'Veracode SAST'
-

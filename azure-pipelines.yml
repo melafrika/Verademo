@@ -10,12 +10,15 @@ variables:
   caminhoPacote: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
   SRCCLR_API_TOKEN: $(SCA)
 
-
 steps:
+- checkout: self  # Garante que o código fonte está sendo clonado
+
 - task: CmdLine@2
   inputs:
     script: 'npm install'
+    workingDirectory: '$(Build.SourcesDirectory)'  # Configura o diretório de trabalho para o diretório de código fonte
   displayName: 'NPM'
+
 - task: ArchiveFiles@2
   inputs:
     rootFolderOrFile: '$(Agent.BuildDirectory)'
@@ -28,11 +31,13 @@ steps:
 - script: |
     curl -O -L https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
   displayName: 'Download Pipeline Scanner'
+
 - task: ExtractFiles@1
   inputs:
     archiveFilePatterns: 'pipeline-scan-LATEST.zip'
     destinationFolder: '$(Build.ArtifactStagingDirectory)'
     cleanDestinationFolder: false
+
 - script: |
       java -jar $(Build.ArtifactStagingDirectory)/pipeline-scan.jar -vid $(APIID) -vkey $(APIKEY) --file '$(caminhoPacote)' --issue_details true 
   displayName: 'Veracode PipelineScan'
@@ -63,3 +68,4 @@ steps:
     importResults: true
     failBuildOnPolicyFail: false
   displayName: 'Veracode SAST'
+
